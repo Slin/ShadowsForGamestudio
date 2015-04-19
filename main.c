@@ -27,6 +27,8 @@
 
 void main()
 {
+	video_mode = 11;
+	
 	level_load(NULL);
 	vec_set(sky_color, vector(255, 200, 100));
 	
@@ -34,7 +36,7 @@ void main()
 	
 	vec_set(camera.x, vector(0, 0, 10));
 	camera.clip_near = 0.1;
-	camera.clip_far = 1500;
+	camera.clip_far = 2500;
 	
 	ENTITY *ground = ent_create("resources/cube.mdl", vector(0, 0, -1), NULL);
 	set(ground, SHADOW);
@@ -52,4 +54,12 @@ void main()
 	}
 	
 	pssm_run(4);
+	
+	float time = 60.0;
+	while(1)
+	{
+		time += (key_e-key_q)*16*time_step;
+		vec_set(sun_angle.pan, vector(time, cos(3.1514*time/180.0)*45+45, 0));
+		wait(1);
+	}
 }

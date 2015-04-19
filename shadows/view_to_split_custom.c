@@ -31,7 +31,7 @@ void view_to_split_custom(VIEW *frustview, var nearplane, var farplane, VIEW *sp
 	nearcenter.y = screen_size.y*0.5;
 	nearcenter.z = nearplane;
 	vec_for_screen(&nearcenter, frustview);
-	
+		
 	farleft.x = 0.0;
 	farleft.y = 0.0;
 	farleft.z = farplane;
@@ -54,9 +54,12 @@ void view_to_split_custom(VIEW *frustview, var nearplane, var farplane, VIEW *sp
 	split->right = dist;
 	split->bottom = -dist;
 	split->top = dist;
+	split->clip_far = 100000;
+	split->clip_near = 1;
 	
-	vec_set(split.x, &center);
-	vec_add(split.x, &sun_pos);
+	vec_set(split.x, vector(-10000.0, 0.0, 0.0));
+	vec_rotate(split.x, vector(sun_angle.pan+180, -sun_angle.tilt, 0));
+	vec_add(split.x, &center);
 	
 	//--------------------------------------------------------
 	//move light view in pixel steps, to remove flickering

@@ -180,8 +180,8 @@ float4 renderShadows_PS(
 #endif
 
 	float alpha = tex2Dlod(sBaseTex,float4(inTex.xy,0.0f,0.0f)).a * pssm_transparency_var;
-	clip(alpha-d3d_alpharef_var/255.f); // for alpha transparent textures
-	return float4(0,0,0,clamp(1-2.5*fShadow,0,alpha));
+	clip(alpha - d3d_alpharef_var/255.f); // for alpha transparent textures
+	return float4(0, 0, 0, clamp(1 - 2.5*fShadow, 0, alpha));
 }
 
 technique renderShadows

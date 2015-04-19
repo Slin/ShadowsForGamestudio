@@ -42,7 +42,7 @@ float4 renderDepth_PS(float4 PixelPos: TEXCOORD0, float2 TexCoord: TEXCOORD1): C
 {
 	clip(tex2D(sBaseTex,TexCoord).a-d3d_alpharef_var/255.);	// skip transparent parts of textures
 
-	return PixelPos.z/PixelPos.w + abs(ddx(PixelPos.z))*pssm_fbias_flt + abs(ddy(PixelPos.z))*pssm_fbias_flt;
+	return PixelPos.z/PixelPos.w + abs(ddx(PixelPos.z))*pssm_fbias_flt + abs(ddy(PixelPos.z))*pssm_fbias_flt + 0.000001;
 }
 
 technique renderDepth
