@@ -130,17 +130,17 @@ void renderShadows_VS(
 {
 // calculate world position
 #ifdef BONES
-  float4 PosWorld = DoPos(DoBones(inPos,inBoneIndices,inBoneWeights));
+  float4 PosWorld = DoPos(DoBones(inPos, inBoneIndices, inBoneWeights));
 #else  
   float4 PosWorld = DoPos(inPos);
 #endif  
-  outPos = mul(PosWorld,matViewProj);
+  outPos = mul(PosWorld, matViewProj);
 // store view space position
   fDistance = mul(PosWorld, matView).z;
   outTex = inTex;
 // coordinates for shadow maps
-  for(int i=0;i<pssm_numsplits_var;i++)
-    TexCoord[i] = mul(PosWorld,matTex[i]);
+  for(int i = 0; i < pssm_numsplits_var; i++)
+    TexCoord[i] = mul(PosWorld, matTex[i]);
 }
 
 
@@ -161,13 +161,13 @@ float4 renderShadows_PS(
 	
 #ifdef FAST
   if(inSplit.x > 0.5)
- 	  fShadow = DoFastPCF(sDepth1,TexCoord[0]);
+ 	  fShadow = DoFastPCF(sDepth1, TexCoord[0]);
   else if(inSplit.y > 0.5)
- 	  fShadow = DoFastPCF(sDepth2,TexCoord[1]);
+ 	  fShadow = DoFastPCF(sDepth2, TexCoord[1]);
   else if(inSplit.z > 0.5)
- 	  fShadow = DoFastPCF(sDepth3,TexCoord[2]);
+ 	  fShadow = DoFastPCF(sDepth3, TexCoord[2]);
   else
- 	  fShadow = DoFastPCF(sDepth4,TexCoord[3]);
+ 	  fShadow = DoFastPCF(sDepth4, TexCoord[3]);
 #else
   if(inSplit.x > 0.5)
  	  fShadow = DoPCF(sDepth1, TexCoord[0], PCFSAMPLES_NEAR);
@@ -179,7 +179,7 @@ float4 renderShadows_PS(
  	  fShadow = DoPCF(sDepth4, TexCoord[3], PCFSAMPLES_FAR);
 #endif
 
-	float alpha = tex2Dlod(sBaseTex,float4(inTex.xy,0.0f,0.0f)).a * pssm_transparency_var;
+	float alpha = tex2Dlod(sBaseTex, float4(inTex.xy, 0.0f, 0.0f)).a * pssm_transparency_var;
 	clip(alpha - d3d_alpharef_var/255.f); // for alpha transparent textures
 	return float4(0, 0, 0, clamp(1 - 2.5*fShadow, 0, alpha));
 }
