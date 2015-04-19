@@ -10,6 +10,7 @@
 #define shadows_c
 #include <d3d9.h>
 
+#define PRAGMA_PATH "shadows";
 #define fx_shadow "vp_pssm.fx"	// single-pass shadow shader
 #define fx_depth "vp_depth.fx"	// depth rendering shader
 

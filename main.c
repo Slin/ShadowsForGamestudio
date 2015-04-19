@@ -23,7 +23,7 @@
 #include <acknex.h>
 #include <default.c>
 
-#include "shadows.c"
+#include "shadows/shadows.c"
 
 void main()
 {
@@ -36,7 +36,7 @@ void main()
 	camera.clip_near = 0.1;
 	camera.clip_far = 1500;
 	
-	ENTITY *ground = ent_create("cube.mdl", vector(0, 0, -1), NULL);
+	ENTITY *ground = ent_create("resources/cube.mdl", vector(0, 0, -1), NULL);
 	set(ground, SHADOW);
 	vec_set(ground.scale_x, vector(100, 100, 1.0/8.0));
 	
