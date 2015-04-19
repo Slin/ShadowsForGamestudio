@@ -19,7 +19,7 @@
 // PSSM global variables /////////////////////////////////////////
 var pssm_res = 1024;			// shadow map resolution
 var pssm_numsplits = 4;		// number of splits: 3 for small, 4 for large levels
-var pssm_splitweight = 0.5; 	// logarithmic / uniform ratio
+var pssm_splitweight = 0.75; 	// logarithmic / uniform ratio
 var pssm_splitdist[5];				// split distances
 var pssm_transparency = 0.6;	// shadow transparency
 float pssm_fbias = 2.5;		// shadow depth bias -> must be adjusted

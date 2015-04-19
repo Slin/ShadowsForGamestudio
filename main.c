@@ -38,6 +38,10 @@ void main()
 	camera.clip_near = 0.1;
 	camera.clip_far = 2500;
 	
+/*	ENTITY* tree = ent_create("resources/Baum.mdl", vector(0, 0, 0), NULL);
+	set(tree, SHADOW);
+	vec_set(tree.scale_x, vector(1, 1, 1));*/
+	
 	ENTITY *ground = ent_create("resources/cube.mdl", vector(0, 0, -1), NULL);
 	set(ground, SHADOW);
 	vec_set(ground.scale_x, vector(100, 100, 1.0/8.0));
