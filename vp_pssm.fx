@@ -3,14 +3,14 @@
 // (c) oP group 2010  Version 1.1
 //////////////////////////////////////////////////////////////////////
 //#define BONES // activate GPU bones (reduces the frame rate by 5%)
-#define FAST
+//#define FAST
 
 #ifdef BONES
 #include <bones>
 #endif
 #include <pos>
 
-//const bool AUTORELOAD;
+const bool AUTORELOAD;
 
 float4x4 matViewProj;
 float4x4 matView;
@@ -21,7 +21,6 @@ float4x4 matTex[4]; // set up from the pssm script
 
 float pssm_splitdist_var[5];
 float pssm_numsplits_var = 3;
-float pssm_fbias_flt = 0.0005f;
 float pssm_res_var = 1024;
 float pssm_transparency_var = 0.7;
 float d3d_alpharef_var;
@@ -61,67 +60,59 @@ sampler sDepth4 = sampler_state {
 //////////////////////////////////////////////////////////////////
 
 // PCF soft-shadowing
-float DoPCF(sampler2D sMap,float4 vShadowTexCoord,int iSqrtSamples)
+float DoPCF(sampler2D sMap, float4 vShadowTexCoord, int iSqrtSamples)
 {
-	float fShadowTerm = 0.0f;  
+	float fShadowTerm = 0.0f;
 	float fRadius = (iSqrtSamples - 1.0f) / 2;
-
-	for (float y = -fRadius; y <= fRadius; y++)
+	
+	for(float y = -fRadius; y <= fRadius; y++)
 	{
-		for (float x = -fRadius; x <= fRadius; x++)
+		for(float x = -fRadius; x <= fRadius; x++)
 		{
 			float2 vOffset = float2(x,y)/pssm_res_var;
 			float fDepth = tex2D(sMap, vShadowTexCoord.xy + vOffset).x;
 			float fSample = (vShadowTexCoord.z < fDepth);
-
-// Edge tap smoothing 	
+			
+			// Edge tap smoothing
 			float xWeight = 1, yWeight = 1;
-			if (x == -fRadius) 
+			if(x == -fRadius)
 				xWeight = 1 - frac(vShadowTexCoord.x * pssm_res_var);
-			else if (x == fRadius)
+			else if(x == fRadius)
 				xWeight = frac(vShadowTexCoord.x * pssm_res_var);
-				
-			if (y == -fRadius)
+			
+			if(y == -fRadius)
 				yWeight = 1 - frac(vShadowTexCoord.y * pssm_res_var);
-			else if (y == fRadius)
+			else if(y == fRadius)
 				yWeight = frac(vShadowTexCoord.y * pssm_res_var);
-	
+			
 			fShadowTerm += fSample * xWeight * yWeight;
-		}											
-	}		
+		}
+	}
 	
 	return fShadowTerm / (iSqrtSamples * iSqrtSamples);
 }
 
 // Calculates the shadow occlusion using bilinear PCF
-float DoFastPCF(sampler2D sMap,float4 vShadowTexCoord)
- //float fLightDepth, float2 vTexCoord)
+float DoFastPCF(sampler2D sMap, float4 vShadowTexCoord)
 {
-    float fShadowTerm = 0.0f;
-
-    // transform to texel space
-    float2 vShadowMapCoord = pssm_res_var * vShadowTexCoord.xy;
-    
-    // Determine the lerp amounts           
-    //float2 vLerps = frac(vShadowMapCoord);
-    
-    float4 vLerps;
-    vLerps.xy = frac(vShadowMapCoord.xy);
-    vLerps.zw = 1-vLerps.xy;
-    vLerps = vLerps.zxzx*vLerps.wwyy;
-
-    // read in bilerp stamp, doing the shadow checks
-    float4 fSamples;
-    
-    fSamples.x = (tex2Dlod(sMap,float4(vShadowTexCoord.xy,0,0)).x < vShadowTexCoord.z) ? 0.0f: 1.0f;  
-    fSamples.y = (tex2Dlod(sMap,float4(vShadowTexCoord.xy + float2(1.0/pssm_res_var,0),0,0)).x < vShadowTexCoord.z) ? 0.0f: 1.0f;  
-    fSamples.z = (tex2Dlod(sMap,float4(vShadowTexCoord.xy + float2(0,1.0/pssm_res_var),0,0)).x < vShadowTexCoord.z) ? 0.0f: 1.0f;  
-    fSamples.w = (tex2Dlod(sMap,float4(vShadowTexCoord.xy + float2(1.0/pssm_res_var,1.0/pssm_res_var),0,0)).x < vShadowTexCoord.z) ? 0.0f: 1.0f;  
-    
-    // lerp between the shadow values to calculate our light amount
-    fShadowTerm = dot(fSamples, vLerps);//lerp(lerp(fSamples[0], fSamples[1], vLerps.x ), lerp(fSamples[2], fSamples[3], vLerps.x ), vLerps.y );                              
-                                
-    return fShadowTerm;                                
+	// transform to texel space
+	float2 vShadowMapCoord = pssm_res_var * vShadowTexCoord.xy;
+	
+	// read in bilerp stamp, doing the shadow checks
+	float4 fSamples;
+	float pixelSize = 1.0/pssm_res_var;
+	
+	fSamples.x = (tex2Dlod(sMap, float4(vShadowTexCoord.xy, 0, 0)).x < vShadowTexCoord.z) ? 0.0f: 1.0f;  
+	fSamples.y = (tex2Dlod(sMap, float4(vShadowTexCoord.xy + float2(pixelSize, 0), 0, 0)).x < vShadowTexCoord.z) ? 0.0f: 1.0f;  
+	fSamples.z = (tex2Dlod(sMap, float4(vShadowTexCoord.xy + float2(0, pixelSize), 0, 0)).x < vShadowTexCoord.z) ? 0.0f: 1.0f;  
+	fSamples.w = (tex2Dlod(sMap, float4(vShadowTexCoord.xy + float2(pixelSize, pixelSize), 0, 0)).x < vShadowTexCoord.z) ? 0.0f: 1.0f;  
+	
+	float4 vLerps;
+	vLerps.xy = frac(vShadowMapCoord.xy);
+	vLerps.zw = 1-vLerps.xy;
+	vLerps = vLerps.zxzx*vLerps.wwyy;
+	
+	return dot(fSamples, vLerps);                                
 }
 
 void renderShadows_VS(
@@ -179,13 +170,13 @@ float4 renderShadows_PS(
  	  fShadow = DoFastPCF(sDepth4,TexCoord[3]);
 #else
   if(inSplit.x > 0.5)
- 	  fShadow = DoPCF(sDepth1,TexCoord[0],PCFSAMPLES_NEAR);
+ 	  fShadow = DoPCF(sDepth1, TexCoord[0], PCFSAMPLES_NEAR);
   else if(inSplit.y > 0.5)
- 	  fShadow = DoPCF(sDepth2,TexCoord[1],PCFSAMPLES_FAR);
+ 	  fShadow = DoPCF(sDepth2, TexCoord[1], PCFSAMPLES_FAR);
   else if(inSplit.z > 0.5)
- 	  fShadow = DoPCF(sDepth3,TexCoord[2],PCFSAMPLES_FAR);
+ 	  fShadow = DoPCF(sDepth3, TexCoord[2], PCFSAMPLES_FAR);
   else
- 	  fShadow = DoPCF(sDepth4,TexCoord[3],PCFSAMPLES_FAR);
+ 	  fShadow = DoPCF(sDepth4, TexCoord[3], PCFSAMPLES_FAR);
 #endif
 
 	float alpha = tex2Dlod(sBaseTex,float4(inTex.xy,0.0f,0.0f)).a * pssm_transparency_var;

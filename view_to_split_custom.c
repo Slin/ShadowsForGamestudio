@@ -20,7 +20,7 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-void view_to_split_custom(VIEW *frustview, var nearplane, var farplane, float bias, VIEW *split, float *matSplit)
+void view_to_split_custom(VIEW *frustview, var nearplane, var farplane, VIEW *split, float *matSplit)
 {
 	VECTOR nearcenter;
 	VECTOR farleft;
@@ -87,7 +87,5 @@ void view_to_split_custom(VIEW *frustview, var nearplane, var farplane, float bi
 	D3DXMATRIX matview;
 	D3DXMATRIX matproj;
 	view_to_matrix(split, &matview, &matproj);
-	float *mat = &matproj;
-	mat[10] *= 1.0 - bias;
 	D3DXMatrixMultiply(matSplit, &matview, &matproj);
 }

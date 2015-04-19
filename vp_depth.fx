@@ -11,6 +11,7 @@
 //const bool AUTORELOAD;
 float d3d_alpharef_var;
 float4x4 matViewProj;	// set up from the pssm script
+float pssm_fbias_flt = 2.5f;
 
 texture entSkin1;
 sampler sBaseTex = sampler_state { Texture = <entSkin1>; MipFilter = linear; };
@@ -40,7 +41,8 @@ void renderDepth_VS(
 float4 renderDepth_PS(float4 PixelPos: TEXCOORD0, float2 TexCoord: TEXCOORD1): COLOR
 {
 	clip(tex2D(sBaseTex,TexCoord).a-d3d_alpharef_var/255.);	// skip transparent parts of textures
-	return PixelPos.z / PixelPos.w;
+
+	return PixelPos.z/PixelPos.w + abs(ddx(PixelPos.z))*pssm_fbias_flt + abs(ddy(PixelPos.z))*pssm_fbias_flt;
 }
 
 technique renderDepth
@@ -50,7 +52,7 @@ technique renderDepth
 		ZWriteEnable = True;
 		AlphaBlendEnable = False;
 
-		VertexShader = compile vs_2_0 renderDepth_VS();
-		PixelShader = compile ps_2_0 renderDepth_PS();
+		VertexShader = compile vs_3_0 renderDepth_VS();
+		PixelShader = compile ps_3_0 renderDepth_PS();
   }
 }
